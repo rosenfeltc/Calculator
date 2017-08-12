@@ -185,7 +185,7 @@ public class Stack
 	// Print method
 	public String print()
 	{
-		String content = "Stack Contents:\n-----------------------------------\n";
+		String content = "Stack Contents:\n---------------------------------\n";
 		
 		if(isEmpty())
 		{
@@ -195,12 +195,12 @@ public class Stack
 		{
 			Node traverse = getTop();
 			
-			content+= "--> " + traverse.getNumber();
+			content+= "---> " + traverse.getNumber();
 			traverse = traverse.getNext();
 			
 			while(traverse != null)
 			{
-				content += "\n    " + traverse.getNumber();
+				content += "\n       " + traverse.getNumber();
 				traverse = traverse.getNext();
 			}
 		}

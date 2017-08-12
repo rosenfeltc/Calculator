@@ -1,5 +1,10 @@
+/*This is the Calculator.java class that handles the GUI of the calculator. All the calculator buttons have action listeners
+ * for which most of them interact with the Stack.java class in order to do the user's desired operations.
+ * Coded by Christopher Rosenfelt for CSI 213
+ */
 package calculator;
 
+// Importing the necessary Libraries/Packages
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -7,25 +12,27 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.text.DefaultCaret;
 
 public class Calculator extends JFrame
 {
 	// Fields
-	private String display;
-	private boolean isPI, isE;
-	private JPanel buttonPanel, calculatorDisplayPanel;
+	private String display; // Will be used as the calculator's display screen
+	private boolean isPI, isE, isResult; // booleans that will help the proper resetting of the calculator's display screen
+	private JPanel buttonPanel, calculatorDisplayPanel, stackDisplayPanel; // The necessary panels that will be used on the JFrame to make the GUI Calculator
 	private JButton lnx, logx, ce, pop, backspace, squared, powerOf, sine, cosine, tangent, squareRoot, one, two, three,
-			plus, ex, four, five, six, minus, e, seven, eight, nine, times, pi, decimal, zero, push, divide;
-	private JTextArea stackDisplay;
-	private JTextField calculatorDisplay;
-	private JScrollPane theScrollPane;
+			plus, ex, four, five, six, minus, e, seven, eight, nine, times, pi, decimal, zero, push, divide; // All the calculator buttons
+	private JTextArea stackDisplay; // The display for the stack
+	private JTextField calculatorDisplay; // Used with the display String as the calculator's display screen
+	private JScrollPane theScrollPane; // Used with the stackDisplay to make the stack display a scroll pane
 
 	private void clearDisplay()
 	{
@@ -48,8 +55,15 @@ public class Calculator extends JFrame
 
 	private void backspaceDisplay()
 	{
-		display = display.substring(0, display.length() - 1);
-		calculatorDisplay.setText(display);
+		if(calculatorDisplay.getText().isEmpty())
+		{
+			// Do nothing
+		}
+		else
+		{
+			display = display.substring(0, display.length() - 1);
+			calculatorDisplay.setText(display);
+		}
 	}
 
 	// Constructor
@@ -58,7 +72,8 @@ public class Calculator extends JFrame
 		// Set the booleans initially to false
 		isPI = false;
 		isE = false;
-
+		isResult = false;
+		
 		// The Buttons on the Panel
 		buttonPanel = new JPanel(new GridLayout(6, 5));
 
@@ -184,11 +199,19 @@ public class Calculator extends JFrame
 		buttonPanel.add(divide);
 
 		// The Stack display on ScrollPane on Panel
+		stackDisplayPanel = new JPanel();
 		stackDisplay = new JTextArea();
 		stackDisplay.setText(theStack.print());
-		stackDisplay.setPreferredSize(new Dimension(100, 500));
+		stackDisplay.setFont(new Font("Arial", 1, 18));
+		stackDisplay.setAlignmentX(SwingConstants.LEFT);
 		stackDisplay.setEditable(false);
+		DefaultCaret caret = (DefaultCaret) stackDisplay.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 		theScrollPane = new JScrollPane(stackDisplay);
+		theScrollPane.setPreferredSize(new Dimension(158, 490));
+		theScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		theScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		stackDisplayPanel.add(theScrollPane);
 
 		// The calculator display
 		display = new String();
@@ -198,8 +221,9 @@ public class Calculator extends JFrame
 		calculatorDisplay.setBackground(Color.WHITE);
 		calculatorDisplay.setOpaque(true);
 		calculatorDisplay.setForeground(Color.BLACK);
-		calculatorDisplay.setFont(new Font("Comic Sans MS", 1, 20));
-		calculatorDisplay.setPreferredSize(new Dimension(500, 50));
+		calculatorDisplay.setFont(new Font("Arial", 1, 28));
+		calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+		calculatorDisplay.setPreferredSize(new Dimension(600, 50));
 		calculatorDisplayPanel.add(calculatorDisplay);
 
 		// The Button Listeners:
@@ -213,6 +237,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(8);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -232,6 +257,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(9);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -249,6 +275,9 @@ public class Calculator extends JFrame
 			public void actionPerformed(ActionEvent e)
 			{
 				clearDisplay();
+				isPI = false;
+				isE = false;
+				isResult = false;
 			}
 		});
 
@@ -260,6 +289,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.pop();
+					isResult = true;
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
@@ -287,6 +317,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(13);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -306,6 +337,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(12);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -325,6 +357,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(5);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -344,6 +377,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(6);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -363,6 +397,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(7);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -382,6 +417,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(10);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -398,11 +434,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(1));
@@ -414,11 +451,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(2));
@@ -430,11 +468,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(3));
@@ -449,6 +488,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(1);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -468,6 +508,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(11);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -484,11 +525,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(4));
@@ -500,11 +542,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(5));
@@ -516,11 +559,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(6));
@@ -535,6 +579,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(2);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -551,10 +596,11 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || calculatorDisplay.getText() != "" || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || !calculatorDisplay.getText().isEmpty() || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
+					isResult = false;
 				}
 				
 				isE = true;
@@ -567,11 +613,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(7));
@@ -583,11 +630,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(8));
@@ -599,11 +647,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(9));
@@ -618,6 +667,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(3);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -634,10 +684,11 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isE || calculatorDisplay.getText() != "" || calculatorDisplay.getText().contains("ERROR"))
+				if (isE || !calculatorDisplay.getText().isEmpty() || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isE = false;
+					isResult = false;
 				}
 					
 				isPI = true;
@@ -650,11 +701,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE)
+				if (isPI || isE || isResult)
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 				
 				if(calculatorDisplay.getText().isEmpty())
@@ -671,11 +723,12 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || calculatorDisplay.getText().contains("ERROR"))
+				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
+					isResult = false;
 				}
 
 				addDisplay(Integer.toString(0));
@@ -687,7 +740,7 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if(calculatorDisplay.getText() == "")
+				if(calculatorDisplay.getText().isEmpty() || calculatorDisplay.getText().contains("ERROR"))
 				{
 					setDisplay("ERROR! Not enough arguments! Resetting!");
 				}
@@ -695,6 +748,7 @@ public class Calculator extends JFrame
 				{
 					theStack.push(Double.parseDouble(calculatorDisplay.getText()));
 					stackDisplay.setText(theStack.print());
+					clearDisplay();
 				}
 			}
 		});
@@ -707,6 +761,7 @@ public class Calculator extends JFrame
 				try
 				{
 					double result = theStack.operation(4);
+					isResult = true;
 					theStack.push(result);
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
@@ -714,17 +769,18 @@ public class Calculator extends JFrame
 				catch (StackCalculatorException problem)
 				{
 					setDisplay(problem.getError());
+					stackDisplay.setText(theStack.print());
 				}
 			}
 		});
 
 		// Window Settings
-		setSize(600, 600);
+		setSize(700, 600);
 		setLocationRelativeTo(null);
 		setTitle("Stack Calculator");
 		add(buttonPanel, BorderLayout.CENTER);
-		add(theScrollPane, BorderLayout.LINE_START);
-		add(calculatorDisplay, BorderLayout.PAGE_START);
+		add(stackDisplayPanel, BorderLayout.LINE_START);
+		add(calculatorDisplayPanel, BorderLayout.PAGE_START);
 		setResizable(false);
 		setVisible(true);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
