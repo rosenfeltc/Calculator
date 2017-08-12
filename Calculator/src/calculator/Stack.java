@@ -4,12 +4,14 @@ import java.util.EmptyStackException;
 
 public class Stack
 {
-	private Node top;
+	private Node top; // Top of the Stack
+	private int size; // How many arguments are in the Stack
 	
 	// Constructor
 	public Stack()
 	{
 		top = null;
+		size = 0;
 	}
 	
 	// Top Getter
@@ -24,6 +26,24 @@ public class Stack
 		this.top = top;
 	}
 	
+	// Size Getter
+	public int getSize()
+	{
+		return size;
+	}
+	
+	// Size Incrementer
+	private void incrementSize()
+	{
+		size++;
+	}
+	
+	// Size Decrementer
+	private void decrementSize()
+	{
+		size--;
+	}
+	
 	//Is Empty method
 	private boolean isEmpty()
 	{
@@ -35,25 +55,26 @@ public class Stack
 	{
 		Node newNode = new Node(number);
 		
-		// List is empty so only need to add to beginning of stack
-		if(isEmpty())
+		// List is not empty so new Node should point to what used to be
+		// the beginning of the stack
+		if(!isEmpty())
 		{
-			setTop(newNode);
-			return;
+			newNode.setNext(getTop());
 		}
 		
-		// List is not empty so add new node to beginning of stack but
-		// also have newNode point to Node that used to be the beginning
-		newNode.setNext(getTop());
+		// New Node is now the top of the stack
 		setTop(newNode);
+		
+		// Increment the size counter
+		incrementSize();
 	}
 	
 	// Pop Method
-	public double pop() throws EmptyStackException
+	public double pop() throws StackCalculatorException
 	{
 		if(isEmpty())
 		{
-			throw new EmptyStackException();
+			throw new StackCalculatorException(1);
 		}
 		
 		// Get the data from top of the stack
@@ -62,33 +83,73 @@ public class Stack
 		// Remove data from the top of the stack
 		setTop(getTop().getNext());
 		
+		// Decrement size counter
+		decrementSize();
+		
 		return temp;
 	}
 	
 	// Peek Method
-	public double peek() throws EmptyStackException
+	public double peek() throws StackCalculatorException
 	{
 		if(isEmpty())
 		{
-			throw new EmptyStackException();
+			throw new StackCalculatorException(1);
 		}
 		
 		return getTop().getNumber();
 	}
 	
 	// Operation Method
-	public double operation(int operand)
+	public double operation(int operand) throws StackCalculatorException
 	{
+		if(getSize() == 0)
+		{
+			throw new StackCalculatorException(1);
+		}
+		
+		double arg1, arg2;
 		switch(operand)
 		{
 			case 1:
+				if(getSize() < 2)
+				{
+					throw new StackCalculatorException(2);
+				}
+				
 				return pop() + pop();
 			case 2:
-				return pop() - pop();
+				if(getSize() < 2)
+				{
+					throw new StackCalculatorException(2);
+				}
+				
+				arg2 = pop();
+				arg1 = pop();
+				return arg1 - arg2;
 			case 3:
+				if(getSize() < 2)
+				{
+					throw new StackCalculatorException(2);
+				}
+				
 				return pop() * pop();
 			case 4:
-				return pop() / pop();
+				if(getSize() < 2)
+				{
+					throw new StackCalculatorException(2);
+				}
+				
+				arg2 = pop();
+				
+				if(arg2 == 0.0)
+				{
+					throw new StackCalculatorException(3);
+				}
+				
+				arg1 = pop();
+				
+				return arg1 / arg2;
 			case 5:
 				return Math.sin(pop());
 			case 6:
@@ -104,7 +165,15 @@ public class Stack
 			case 11:
 				return Math.pow(Math.E, pop());
 			case 12:
-				return Math.pow(pop(), pop());
+				if(getSize() < 2)
+				{
+					throw new StackCalculatorException(2);
+				}
+				
+				arg2 = pop();
+				arg1 = pop();
+				
+				return Math.pow(arg1, arg2);
 			case 13:
 				return Math.pow(pop(), 2);
 		}
