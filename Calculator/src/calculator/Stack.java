@@ -116,7 +116,7 @@ public class Stack
 	// Print method
 	public String print()
 	{
-		String content = "Stack Contents:\n-------------\n";
+		String content = "Stack Contents:\n-----------------------------------\n";
 		
 		if(isEmpty())
 		{
