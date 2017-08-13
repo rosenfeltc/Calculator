@@ -69,16 +69,24 @@ public class Calculator extends JFrame
 	// anything
 	private void backspaceDisplay()
 	{
-		// Screen is already empty or showing a calculated result or an error
-		if (calculatorDisplay.getText().isEmpty() || isResult || calculatorDisplay.getText().contains("ERROR"))
+		// Screen is already empty or showing a calculated result or an error, or is pi or is e
+		if (calculatorDisplay.getText().isEmpty() || calculatorDisplay.getText().contains("ERROR")
+				|| isResult ||isPI || isE)
 		{
 			// Do nothing
+			return;
 		}
-		// Remove the last character inserted
-		else
+		
+		// Check to see if the character we are trying to backspace on is the dot operator so that
+		// we can reset its boolean if necessary
+		char lastChar = calculatorDisplay.getText().charAt(calculatorDisplay.getText().length() - 1);
+		if(lastChar == '.')
 		{
-			setDisplay(display.substring(0, display.length() - 1));
+			isDot = false;
 		}
+		
+		// Remove the last Character from the String that is Displayed
+		setDisplay(display.substring(0, display.length() - 1));
 	}
 
 	// Constructor taking the Stack reference as a parameter
@@ -391,7 +399,7 @@ public class Calculator extends JFrame
 		backspace.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
-			{
+			{	
 				// call the backspace method
 				backspaceDisplay();
 			}
