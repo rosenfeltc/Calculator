@@ -26,14 +26,20 @@ public class Calculator extends JFrame
 {
 	// Fields
 	private String display; // Will be used as the calculator's display screen
-	private boolean isPI, isE, isResult; // booleans that will help the proper resetting of the calculator's display screen
-	private JPanel buttonPanel, calculatorDisplayPanel, stackDisplayPanel; // The necessary panels that will be used on the JFrame to make the GUI Calculator
+	private boolean isPI, isE, isResult, isCenter, isDot; // booleans that will help the proper resetting of the calculator's
+													// display
+	// screen
+	private JPanel buttonPanel, calculatorDisplayPanel, stackDisplayPanel; // The necessary panels that will be placed
+																			// on the JFrame to make the GUI Calculator
 	private JButton lnx, logx, ce, pop, backspace, squared, powerOf, sine, cosine, tangent, squareRoot, one, two, three,
-			plus, ex, four, five, six, minus, e, seven, eight, nine, times, pi, decimal, zero, push, divide; // All the calculator buttons
+			plus, ex, four, five, six, minus, e, seven, eight, nine, times, pi, dot, zero, push, divide; // All the
+																											// calculator
+																											// buttons
 	private JTextArea stackDisplay; // The display for the stack
 	private JTextField calculatorDisplay; // Used with the display String as the calculator's display screen
 	private JScrollPane theScrollPane; // Used with the stackDisplay to make the stack display a scroll pane
 
+	// Method that resets the calculator's display screen
 	private void clearDisplay()
 	{
 		display = "";
@@ -41,43 +47,53 @@ public class Calculator extends JFrame
 
 	}
 
+	// Method that adds the passed in string to the current display String and
+	// updates the calculator's display screen accordingly
 	private void addDisplay(String arg)
 	{
 		display += arg;
 		calculatorDisplay.setText(display);
 	}
 
+	// Method that replaces the display String with the passed in String and
+	// updates the calculator's display screen accordingly
 	private void setDisplay(String arg)
 	{
 		display = arg;
 		calculatorDisplay.setText(display);
 	}
 
+	// Method that acts like the back space button on the display screen, meaning
+	// it removes the last inserted character inputted. If the screen is blank or
+	// if the screen is showing a calculatted result, then backspace doesn't do
+	// anything
 	private void backspaceDisplay()
 	{
-		if(calculatorDisplay.getText().isEmpty())
+		// Screen is already empty or showing a calculated result or an error
+		if (calculatorDisplay.getText().isEmpty() || isResult || calculatorDisplay.getText().contains("ERROR"))
 		{
 			// Do nothing
 		}
+		// Remove the last character inserted
 		else
 		{
-			display = display.substring(0, display.length() - 1);
-			calculatorDisplay.setText(display);
+			setDisplay(display.substring(0, display.length() - 1));
 		}
 	}
 
-	// Constructor
+	// Constructor taking the Stack reference as a parameter
 	public Calculator(Stack theStack)
 	{
-		// Set the booleans initially to false
+		// Set the booleans initially to false as they haven't been activated yet
 		isPI = false;
 		isE = false;
 		isResult = false;
-		
-		// The Buttons on the Panel
-		buttonPanel = new JPanel(new GridLayout(6, 5));
+		isCenter = false;
+		isDot = false;
+		// Instantiating the buttons and adding them to the corresponding Panel
+		buttonPanel = new JPanel(new GridLayout(6, 5)); // 30 total buttons - 6 rows and 5 columns
 
-		// The Buttons on the Panel
+		// The Buttons on the Panel - self explanatory variable names
 		lnx = new JButton("ln(x)");
 		lnx.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(lnx);
@@ -94,15 +110,15 @@ public class Calculator extends JFrame
 		pop.setFont(new Font("Arial", 1, 30));
 		buttonPanel.add(pop);
 
-		backspace = new JButton("\u2190");
+		backspace = new JButton("\u2190"); // unicode for the left pointing arrow
 		backspace.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(backspace);
 
-		squared = new JButton("x\u00B2");
+		squared = new JButton("x\u00B2"); // unicode for the superscript "2"
 		squared.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(squared);
 
-		powerOf = new JButton("x\u02B8");
+		powerOf = new JButton("x\u02B8"); // unicode for the superscript "y"
 		powerOf.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(powerOf);
 
@@ -118,7 +134,7 @@ public class Calculator extends JFrame
 		tangent.setFont(new Font("Arial", 0, 24));
 		buttonPanel.add(tangent);
 
-		squareRoot = new JButton("\u221A");
+		squareRoot = new JButton("\u221A"); // unicode for the square root symbol
 		squareRoot.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(squareRoot);
 
@@ -138,7 +154,7 @@ public class Calculator extends JFrame
 		plus.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(plus);
 
-		ex = new JButton("e\u02E3");
+		ex = new JButton("e\u02E3"); // unicode for the superscript "x"
 		ex.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(ex);
 
@@ -178,13 +194,13 @@ public class Calculator extends JFrame
 		times.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(times);
 
-		pi = new JButton("\u03A0");
+		pi = new JButton("\u03C0"); // unicode for the lower case pi symbol
 		pi.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(pi);
 
-		decimal = new JButton(".");
-		decimal.setFont(new Font("Arial", 0, 30));
-		buttonPanel.add(decimal);
+		dot = new JButton(".");
+		dot.setFont(new Font("Arial", 0, 30));
+		buttonPanel.add(dot);
 
 		zero = new JButton("0");
 		zero.setFont(new Font("Arial", 0, 30));
@@ -194,30 +210,35 @@ public class Calculator extends JFrame
 		push.setFont(new Font("Arial", 1, 22));
 		buttonPanel.add(push);
 
-		divide = new JButton("\u00F7");
+		divide = new JButton("\u00F7"); // unicode for the division symbol
 		divide.setFont(new Font("Arial", 0, 30));
 		buttonPanel.add(divide);
 
 		// The Stack display on ScrollPane on Panel
 		stackDisplayPanel = new JPanel();
 		stackDisplay = new JTextArea();
-		stackDisplay.setText(theStack.print());
+		stackDisplay.setText(theStack.print()); // uses the print method from Stack.java to obtain a String with the
+												// contents of the stack
 		stackDisplay.setFont(new Font("Arial", 1, 18));
 		stackDisplay.setAlignmentX(SwingConstants.LEFT);
-		stackDisplay.setEditable(false);
+		stackDisplay.setEditable(false); // can't be edited
+		// Force the scroll pane to not scroll automatically - allows for the proper
+		// showing of the stack
 		DefaultCaret caret = (DefaultCaret) stackDisplay.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+		// Create the scroll pane and adjust it to only show the scrollbars when they
+		// become necessary
 		theScrollPane = new JScrollPane(stackDisplay);
 		theScrollPane.setPreferredSize(new Dimension(158, 490));
 		theScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		theScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		stackDisplayPanel.add(theScrollPane);
 
-		// The calculator display
+		// The calculator display on the panel
 		display = new String();
 		calculatorDisplayPanel = new JPanel();
 		calculatorDisplay = new JTextField(display);
-		calculatorDisplay.setEditable(false);
+		calculatorDisplay.setEditable(false); // can't be edited
 		calculatorDisplay.setBackground(Color.WHITE);
 		calculatorDisplay.setOpaque(true);
 		calculatorDisplay.setForeground(Color.BLACK);
@@ -226,25 +247,47 @@ public class Calculator extends JFrame
 		calculatorDisplay.setPreferredSize(new Dimension(600, 50));
 		calculatorDisplayPanel.add(calculatorDisplay);
 
-		// The Button Listeners:
-		//--------------------------
-		
+		// -------------------------//
+		// The Button Listeners: //
+		// -------------------------//
+
 		// Natural log of X button
 		lnx.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(8);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -254,17 +297,38 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(9);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -274,10 +338,13 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// Clear the display and ensure all the booleans (except for isCenter) are set
+				// to false
 				clearDisplay();
 				isPI = false;
 				isE = false;
 				isResult = false;
+				isDot = false;
 			}
 		});
 
@@ -286,16 +353,36 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Pop the stack, display it as a result and update the stack display
 					double result = theStack.pop();
 					isResult = true;
+					isDot = false; // Allow the dot operator to be used again
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -305,6 +392,7 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// call the backspace method
 				backspaceDisplay();
 			}
 		});
@@ -314,17 +402,38 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(13);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -334,17 +443,38 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(12);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -354,17 +484,38 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(5);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -374,17 +525,38 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(6);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -394,17 +566,38 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(7);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -414,17 +607,38 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(10);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
@@ -434,6 +648,8 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
 				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
@@ -442,6 +658,14 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 1 to the calculator display screen
 				addDisplay(Integer.toString(1));
 			}
 		});
@@ -451,7 +675,9 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -459,6 +685,14 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 2 to the calculator display screen
 				addDisplay(Integer.toString(2));
 			}
 		});
@@ -468,7 +702,9 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -476,6 +712,14 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 3 to the calculator display screen
 				addDisplay(Integer.toString(3));
 			}
 		});
@@ -485,47 +729,91 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(1);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
-		
+
 		// e to the power of X button
 		ex.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(11);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
-		
+
 		// 4 button
 		four.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -533,6 +821,14 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 4 to the calculator display screen
 				addDisplay(Integer.toString(4));
 			}
 		});
@@ -542,7 +838,9 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -550,6 +848,14 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 5 to the calculator display screen
 				addDisplay(Integer.toString(5));
 			}
 		});
@@ -559,7 +865,9 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -567,6 +875,14 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 6 to the calculator display screen
 				addDisplay(Integer.toString(6));
 			}
 		});
@@ -576,44 +892,78 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(2);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
 		});
-		
+
 		// e button
 		e.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || !calculatorDisplay.getText().isEmpty() || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen if it contains any contents and set the other booleans to
+				// false
+				if (!calculatorDisplay.getText().isEmpty())
 				{
 					clearDisplay();
 					isPI = false;
 					isResult = false;
 				}
-				
+
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add e value to the screen and update the isE boolean to true
 				isE = true;
 				addDisplay(Double.toString(Math.E));
+				isDot = false; // Allow the dot operator to be used again
 			}
 		});
-		
+
 		// 7 button
 		seven.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -621,6 +971,14 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 7 to the calculator display screen
 				addDisplay(Integer.toString(7));
 			}
 		});
@@ -630,7 +988,9 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -638,6 +998,14 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 8 to the calculator display screen
 				addDisplay(Integer.toString(8));
 			}
 		});
@@ -647,7 +1015,9 @@ public class Calculator extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -655,75 +1025,134 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 9 to the calculator display screen
 				addDisplay(Integer.toString(9));
 			}
 		});
-		
+
 		// Multiplication button
 		times.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(3);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
 				}
 			}
-		});		
+		});
 
 		// PI button
 		pi.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isE || !calculatorDisplay.getText().isEmpty() || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen if it contains any contents and set the other booleans to
+				// false
+				if (!calculatorDisplay.getText().isEmpty())
 				{
 					clearDisplay();
 					isE = false;
 					isResult = false;
 				}
-					
+
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add pi to the display and set isPI to true
 				isPI = true;
 				addDisplay(Double.toString(Math.PI));
+				isDot = false; // Allow the dot operator to be used again
 			}
 		});
-		
+
 		// Decimal point button
-		decimal.addActionListener(new ActionListener()
+		dot.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult)
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
 					isE = false;
 					isResult = false;
 				}
-				
-				if(calculatorDisplay.getText().isEmpty())
+
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// If screen is empty then make sure to add 0 before the decimal point
+				if (calculatorDisplay.getText().isEmpty())
 				{
 					addDisplay(Integer.toString(0));
 				}
-
-				addDisplay(".");
+				
+				// The dot operator hasn't been used yet, then use it but update boolean so that only one dot
+				// per input can be used
+				if(!isDot)
+				{
+					// Add the decimal point
+					addDisplay(".");
+					isDot = true;
+				}
 			}
 		});
-		
+
 		// 0 button
 		zero.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (isPI || isE || isResult ||  calculatorDisplay.getText().contains("ERROR"))
+				// Clear the screen and reset the booleans if either PI, E, Result are activated
+				// or if display screen is showing any errors
+				if (isPI || isE || isResult || calculatorDisplay.getText().contains("ERROR"))
 				{
 					clearDisplay();
 					isPI = false;
@@ -731,44 +1160,88 @@ public class Calculator extends JFrame
 					isResult = false;
 				}
 
+				// If display is currently centered then set right to left and update boolean
+				if (isCenter)
+				{
+					calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+					isCenter = false;
+				}
+
+				// Add 0 to the calculator display
 				addDisplay(Integer.toString(0));
 			}
 		});
-		
+
 		// PUSH button
 		push.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if(calculatorDisplay.getText().isEmpty() || calculatorDisplay.getText().contains("ERROR"))
+				// Error handling - can't push an empty screen or a screen showing an error
+				if (calculatorDisplay.getText().isEmpty() || calculatorDisplay.getText().contains("ERROR"))
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay("ERROR! Not enough arguments! Resetting!");
 				}
+				// Push the appropriate double from the screen onto the stack, update the stack
+				// display
+				// and reset the calculator display screen
 				else
 				{
 					theStack.push(Double.parseDouble(calculatorDisplay.getText()));
 					stackDisplay.setText(theStack.print());
 					clearDisplay();
+					isDot = false; // argument has been pushed so we can use the dot operator again
 				}
 			}
 		});
-		
+
 		// Division button
 		divide.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// May return a stack calculator exception
 				try
 				{
+					// Obtain the appropriate result from the operation method
+					// display it, push it back to the stack, update the stack
+					// and adjust the isResult boolean
 					double result = theStack.operation(4);
 					isResult = true;
 					theStack.push(result);
+
+					// If display is currently centered then set right to left and update boolean
+					if (isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+						isCenter = false;
+					}
+
 					setDisplay(Double.toString(result));
 					stackDisplay.setText(theStack.print());
 				}
 				catch (StackCalculatorException problem)
 				{
+					// If display is currently not centered then center it and update boolean
+					if (!isCenter)
+					{
+						calculatorDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+						isCenter = true;
+					}
+
+					// Display the error
 					setDisplay(problem.getError());
+					isDot = false; // Allow the dot operator to be used again
+					// Update the stack display in case of division by zero
+					// error to show zero out of the stack
 					stackDisplay.setText(theStack.print());
 				}
 			}
@@ -776,7 +1249,7 @@ public class Calculator extends JFrame
 
 		// Window Settings
 		setSize(700, 600);
-		setLocationRelativeTo(null);
+		setLocationRelativeTo(null); // Sets the location to the center of the computer screen
 		setTitle("Stack Calculator");
 		add(buttonPanel, BorderLayout.CENTER);
 		add(stackDisplayPanel, BorderLayout.LINE_START);
